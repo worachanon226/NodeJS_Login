@@ -26,7 +26,7 @@ const ifNotLoggedIn = (req,res,next)=>{
 }
 
 const ifLoggedIn = (req,res,next)=>{
-    if(!req.session.isLoggedIn){
+    if(req.session.isLoggedIn){
         return res.redirect('/home')
     }
     next();
@@ -58,7 +58,30 @@ app.post('/register', ifLoggedIn, [
 ], //end of post data validation
     (req,res,next)=>{
         const validation_result = validationResult(req)
-        
+        const {user_name, user_pass, user_email} = req.body
+
+        if(validation_result.isEmpty()){
+            bcrypt.hash(user_pass, 12).then((hash_pass)=>{
+                dbConnecttion.execute("INSERT INTO users (name, email, password) VALUES(?, ?, ?)", [user_name, user_email, user_pass])
+                .then(result=>{
+                    res.send(`Your account has been created successfully, Now you can <a href="/">Login</a>`)
+                }).catch(err=>{
+                    if(err) throw err
+                })
+            }).catch(err=>{
+                if(err) throw err
+            })
+        }
+        else{
+            let allErrors = validation_result.errors.map((error)=>{
+                return error.msg
+            })
+
+            res.render('views/login-register',{
+                register_error: allErrors,
+                old_data: req.body
+            })
+        }
     }
 )
 
