@@ -1,9 +1,9 @@
 const mysql = require("mysql2")
-const dbConnecttion = mysql.createPool({
+const dbConnection = mysql.createPool({
     host: "localhost",
     user: "root",
     password: "root",
     database: "nodejs_login"
 }).promise()
 
-module.exports = dbConnecttion
+module.exports = dbConnection
